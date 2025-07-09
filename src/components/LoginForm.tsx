@@ -8,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { User, Lock, Coffee } from 'lucide-react';
 
 interface LoginFormProps {
-  onLogin: (studentId: string) => void;
+  onLogin: (studentId: string, isAdmin?: boolean) => void;
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
@@ -32,13 +32,21 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     
     // Simulate login delay
     setTimeout(() => {
+      // Check for admin login
+      if (studentId === 'admin' && password === 'admin') {
+        toast({
+          title: "Welcome Admin!",
+          description: "Successfully logged in to admin dashboard",
+        });
+        onLogin(studentId, true);
+      }
       // Mock authentication - accept any student ID with password "password"
-      if (password === 'password') {
+      else if (password === 'password') {
         toast({
           title: "Welcome back!",
           description: `Successfully logged in as ${studentId}`,
         });
-        onLogin(studentId);
+        onLogin(studentId, false);
       } else {
         toast({
           title: "Login Failed",
@@ -57,7 +65,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
             <Coffee className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">Café Shift Scheduler</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-800">GustieGo</CardTitle>
           <CardDescription>Sign in to view and request shifts</CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,9 +105,10 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
-            <p className="text-xs text-gray-500 text-center mt-4">
-              Demo: Use any Student ID with password "password"
-            </p>
+            <div className="text-xs text-gray-500 text-center mt-4 space-y-1">
+              <p>Demo: Use any Student ID with password "password"</p>
+              <p>Admin: Use "admin" / "admin"</p>
+            </div>
           </form>
         </CardContent>
       </Card>

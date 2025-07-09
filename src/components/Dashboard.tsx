@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -127,7 +126,7 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
                 <Coffee className="w-4 h-4 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-800">Café Shifts</h1>
+              <h1 className="text-xl font-bold text-gray-800">GustieGo</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">Welcome, {studentId}</span>
