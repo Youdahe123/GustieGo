@@ -4,17 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { LogOut, Coffee, Clock, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
+import { LogOut, Coffee, Clock, DollarSign, AlertTriangle, CheckCircle, Trash2, AlertCircle } from 'lucide-react';
 
 interface LocationShift {
   id: string;
   location: string;
+  day: string;
   timeSlot: string;
   hoursPerShift: number;
   maxWorkers: number;
   currentWorkers: number;
-  status: 'available' | 'requested' | 'full';
+  status: 'available' | 'requested' | 'assigned' | 'full';
 }
 
 interface DashboardProps {
@@ -24,22 +28,29 @@ interface DashboardProps {
 
 const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
   const locations = ['Kitchen', 'Salad', 'Bakery', 'Wok', 'Pizza', 'Grill', 'Deli', 'Cashier', 'Rotisserie', 'Dishroom', 'Lunch Buffet', 'Courtyard', 'STEAMery'];
+  const [selectedLocation, setSelectedLocation] = useState<string>('All Locations');
+  const [accessKey, setAccessKey] = useState('');
+  const [shiftToRemove, setShiftToRemove] = useState<string | null>(null);
+  const [isRemovalDialogOpen, setIsRemovalDialogOpen] = useState(false);
   
   const [weekdayShifts, setWeekdayShifts] = useState<LocationShift[]>([
-    { id: 'w1', location: 'Kitchen', timeSlot: 'Mon-Fri 7:00-11:00 AM', hoursPerShift: 20, maxWorkers: 3, currentWorkers: 1, status: 'available' },
-    { id: 'w2', location: 'Salad', timeSlot: 'Mon-Fri 11:00 AM-3:00 PM', hoursPerShift: 20, maxWorkers: 2, currentWorkers: 0, status: 'available' },
-    { id: 'w3', location: 'Pizza', timeSlot: 'Mon-Fri 3:00-7:00 PM', hoursPerShift: 20, maxWorkers: 2, currentWorkers: 2, status: 'full' },
-    { id: 'w4', location: 'Grill', timeSlot: 'Mon-Fri 7:00-11:00 AM', hoursPerShift: 20, maxWorkers: 2, currentWorkers: 0, status: 'available' },
-    { id: 'w5', location: 'Cashier', timeSlot: 'Mon-Fri 11:00 AM-3:00 PM', hoursPerShift: 20, maxWorkers: 4, currentWorkers: 2, status: 'available' },
-    { id: 'w6', location: 'Dishroom', timeSlot: 'Mon-Fri 7:00-11:00 PM', hoursPerShift: 20, maxWorkers: 3, currentWorkers: 1, status: 'available' }
+    { id: 'w1', location: 'Kitchen', day: 'Monday', timeSlot: '7:00-11:00 AM', hoursPerShift: 4, maxWorkers: 3, currentWorkers: 1, status: 'available' },
+    { id: 'w2', location: 'Kitchen', day: 'Tuesday', timeSlot: '7:00-11:00 AM', hoursPerShift: 4, maxWorkers: 3, currentWorkers: 2, status: 'available' },
+    { id: 'w3', location: 'Salad', day: 'Monday', timeSlot: '11:00 AM-3:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 0, status: 'available' },
+    { id: 'w4', location: 'Salad', day: 'Wednesday', timeSlot: '11:00 AM-3:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'available' },
+    { id: 'w5', location: 'Pizza', day: 'Friday', timeSlot: '3:00-7:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 2, status: 'full' },
+    { id: 'w6', location: 'Grill', day: 'Thursday', timeSlot: '7:00-11:00 AM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 0, status: 'available' },
+    { id: 'w7', location: 'Cashier', day: 'Tuesday', timeSlot: '11:00 AM-3:00 PM', hoursPerShift: 4, maxWorkers: 4, currentWorkers: 2, status: 'requested' },
+    { id: 'w8', location: 'Dishroom', day: 'Monday', timeSlot: '7:00-11:00 PM', hoursPerShift: 4, maxWorkers: 3, currentWorkers: 1, status: 'assigned' }
   ]);
 
   const [weekendShifts, setWeekendShifts] = useState<LocationShift[]>([
-    { id: 'e1', location: 'Kitchen', timeSlot: 'Fri 4:00 PM-8:00 PM, Sat-Sun 8:00 AM-12:00 PM', hoursPerShift: 12, maxWorkers: 2, currentWorkers: 0, status: 'available' },
-    { id: 'e2', location: 'Salad', timeSlot: 'Sat-Sun 12:00-4:00 PM', hoursPerShift: 8, maxWorkers: 2, currentWorkers: 1, status: 'available' },
-    { id: 'e3', location: 'Bakery', timeSlot: 'Sat-Sun 6:00-10:00 AM', hoursPerShift: 8, maxWorkers: 1, currentWorkers: 0, status: 'available' },
-    { id: 'e4', location: 'Courtyard', timeSlot: 'Fri 4:00 PM-8:00 PM, Sat-Sun 10:00 AM-2:00 PM', hoursPerShift: 12, maxWorkers: 2, currentWorkers: 1, status: 'available' },
-    { id: 'e5', location: 'STEAMery', timeSlot: 'Sat-Sun 2:00-6:00 PM', hoursPerShift: 8, maxWorkers: 1, currentWorkers: 1, status: 'full' }
+    { id: 'e1', location: 'Kitchen', day: 'Friday', timeSlot: '4:00-8:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 0, status: 'available' },
+    { id: 'e2', location: 'Kitchen', day: 'Saturday', timeSlot: '8:00 AM-12:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'available' },
+    { id: 'e3', location: 'Salad', day: 'Saturday', timeSlot: '12:00-4:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'available' },
+    { id: 'e4', location: 'Bakery', day: 'Sunday', timeSlot: '6:00-10:00 AM', hoursPerShift: 4, maxWorkers: 1, currentWorkers: 0, status: 'available' },
+    { id: 'e5', location: 'Courtyard', day: 'Saturday', timeSlot: '10:00 AM-2:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'requested' },
+    { id: 'e6', location: 'STEAMery', day: 'Sunday', timeSlot: '2:00-6:00 PM', hoursPerShift: 4, maxWorkers: 1, currentWorkers: 1, status: 'full' }
   ]);
 
   const handleRequestShift = (shiftId: string, isWeekend: boolean) => {
@@ -65,17 +76,73 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
     const shift = allShifts.find(s => s.id === shiftId);
     toast({
       title: "Shift Request Sent!",
-      description: `Your request for ${shift?.location} has been submitted.`,
+      description: `Your request for ${shift?.location} on ${shift?.day} has been submitted.`,
     });
   };
 
+  const handleRemoveShift = (type: 'remove' | 'absence') => {
+    if (accessKey !== 'cafe2024') {
+      toast({
+        title: "Invalid Access Key",
+        description: "Please enter the correct access key provided by café management.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!shiftToRemove) return;
+
+    const updateShifts = (shifts: LocationShift[]) =>
+      shifts.map(shift =>
+        shift.id === shiftToRemove
+          ? { ...shift, status: 'available' as const, currentWorkers: shift.currentWorkers - 1 }
+          : shift
+      );
+
+    setWeekdayShifts(updateShifts);
+    setWeekendShifts(updateShifts);
+
+    toast({
+      title: type === 'remove' ? "Shift Removed" : "Absence Marked",
+      description: type === 'remove' 
+        ? "Your shift has been removed and made available for others."
+        : "Your absence has been logged and will be reviewed by management.",
+      variant: type === 'absence' ? "destructive" : "default",
+    });
+
+    setIsRemovalDialogOpen(false);
+    setAccessKey('');
+    setShiftToRemove(null);
+  };
+
+  // Filter shifts by location
+  const getFilteredShifts = (shifts: LocationShift[]) => {
+    if (selectedLocation === 'All Locations') return shifts;
+    return shifts.filter(shift => shift.location === selectedLocation);
+  };
+
+  // Group shifts by day
+  const groupShiftsByDay = (shifts: LocationShift[]) => {
+    const grouped = shifts.reduce((acc, shift) => {
+      if (!acc[shift.day]) {
+        acc[shift.day] = [];
+      }
+      acc[shift.day].push(shift);
+      return acc;
+    }, {} as Record<string, LocationShift[]>);
+    
+    return grouped;
+  };
+
   // Calculate stats
-  const requestedWeekdayShifts = weekdayShifts.filter(shift => shift.status === 'requested');
-  const requestedWeekendShifts = weekendShifts.filter(shift => shift.status === 'requested');
-  const totalHours = requestedWeekdayShifts.reduce((sum, shift) => sum + shift.hoursPerShift, 0) + 
-                    requestedWeekendShifts.reduce((sum, shift) => sum + shift.hoursPerShift, 0);
+  const assignedShifts = [...weekdayShifts, ...weekendShifts].filter(shift => 
+    shift.status === 'requested' || shift.status === 'assigned'
+  );
+  const totalHours = assignedShifts.reduce((sum, shift) => sum + shift.hoursPerShift, 0);
   const estimatedPay = totalHours * 15;
-  const hasWeekendShift = requestedWeekendShifts.length > 0;
+  const hasWeekendShift = weekendShifts.some(shift => 
+    shift.status === 'requested' || shift.status === 'assigned'
+  );
 
   const renderShiftCard = (shift: LocationShift, isWeekend: boolean) => (
     <Card key={shift.id} className="hover:shadow-md transition-shadow">
@@ -84,22 +151,25 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
           <div>
             <h3 className="font-semibold text-lg">{shift.location}</h3>
             <p className="text-sm text-gray-600">{shift.timeSlot}</p>
-            <p className="text-sm font-medium text-green-600">{shift.hoursPerShift} hrs/week • $15/hr</p>
+            <p className="text-sm font-medium text-green-600">{shift.hoursPerShift} hrs • $15/hr</p>
           </div>
           <Badge
             variant={
               shift.status === 'available' ? 'default' :
               shift.status === 'requested' ? 'secondary' :
+              shift.status === 'assigned' ? 'default' :
               'destructive'
             }
             className={
               shift.status === 'available' ? 'bg-green-100 text-green-800' :
               shift.status === 'requested' ? 'bg-blue-100 text-blue-800' :
+              shift.status === 'assigned' ? 'bg-purple-100 text-purple-800' :
               'bg-red-100 text-red-800'
             }
           >
             {shift.status === 'available' ? 'Available' :
              shift.status === 'requested' ? 'Requested' :
+             shift.status === 'assigned' ? 'Assigned' :
              'Full'}
           </Badge>
         </div>
@@ -117,11 +187,55 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
             >
               Request Shift
             </Button>
-          ) : shift.status === 'requested' ? (
-            <Button size="sm" variant="secondary" disabled>
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Requested
-            </Button>
+          ) : shift.status === 'requested' || shift.status === 'assigned' ? (
+            <div className="flex space-x-2">
+              <Button size="sm" variant="secondary" disabled>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {shift.status === 'requested' ? 'Requested' : 'Assigned'}
+              </Button>
+              <Dialog open={isRemovalDialogOpen && shiftToRemove === shift.id} onOpenChange={setIsRemovalDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setShiftToRemove(shift.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Remove Shift</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Enter the access key provided by café management to remove this shift:
+                    </p>
+                    <Input
+                      type="password"
+                      placeholder="Access key"
+                      value={accessKey}
+                      onChange={(e) => setAccessKey(e.target.value)}
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => handleRemoveShift('remove')}
+                        className="flex-1"
+                      >
+                        ❌ Remove Shift
+                      </Button>
+                      <Button
+                        onClick={() => handleRemoveShift('absence')}
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        🚫 Mark Absence
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           ) : (
             <Button size="sm" variant="outline" disabled>
               Full
@@ -130,6 +244,15 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
         </div>
       </CardContent>
     </Card>
+  );
+
+  const renderDayGroup = (day: string, shifts: LocationShift[], isWeekend: boolean) => (
+    <div key={day} className="mb-6">
+      <h3 className="text-lg font-semibold mb-3 text-gray-700">{day}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {shifts.map(shift => renderShiftCard(shift, isWeekend))}
+      </div>
+    </div>
   );
 
   return (
@@ -145,6 +268,17 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
               <h1 className="text-xl font-bold text-gray-800">GustieGo</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All Locations">All Locations</SelectItem>
+                  {locations.map(location => (
+                    <SelectItem key={location} value={location}>{location}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <span className="text-sm text-gray-600">Welcome, {studentId}</span>
               <Button
                 variant="outline"
@@ -228,14 +362,34 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
           </TabsList>
           
           <TabsContent value="weekday" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weekdayShifts.map(shift => renderShiftCard(shift, false))}
+            <div className="space-y-6">
+              {Object.entries(groupShiftsByDay(getFilteredShifts(weekdayShifts))).map(([day, shifts]) =>
+                renderDayGroup(day, shifts, false)
+              )}
+              {Object.keys(groupShiftsByDay(getFilteredShifts(weekdayShifts))).length === 0 && (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-gray-500">No weekday shifts available for {selectedLocation}.</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
           
           <TabsContent value="weekend" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weekendShifts.map(shift => renderShiftCard(shift, true))}
+            <div className="space-y-6">
+              {Object.entries(groupShiftsByDay(getFilteredShifts(weekendShifts))).map(([day, shifts]) =>
+                renderDayGroup(day, shifts, true)
+              )}
+              {Object.keys(groupShiftsByDay(getFilteredShifts(weekendShifts))).length === 0 && (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-gray-500">No weekend shifts available for {selectedLocation}.</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
         </Tabs>
