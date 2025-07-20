@@ -20,11 +20,11 @@ const Index = () => {
     }
   }, []);
 
-  const handleLogin = (studentId: string, adminStatus: boolean = false) => {
-    setCurrentUser(studentId);
+  const handleLogin = (email: string, adminStatus: boolean = false) => {
+    setCurrentUser(email);
     setIsAdmin(adminStatus);
     setIsLoggedIn(true);
-    localStorage.setItem('gustieGo_user', studentId);
+    localStorage.setItem('gustieGo_user', email);
     localStorage.setItem('gustieGo_isAdmin', adminStatus.toString());
   };
 

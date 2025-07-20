@@ -5,24 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { User, Lock, Coffee } from 'lucide-react';
+import { User, Lock, Coffee, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface LoginFormProps {
-  onLogin: (studentId: string, isAdmin?: boolean) => void;
+  onLogin: (email: string, isAdmin?: boolean) => void;
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const [studentId, setStudentId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!studentId || !password) {
+    if (!email || !password) {
       toast({
         title: "Missing Information",
-        description: "Please enter both Student ID and password.",
+        description: "Please enter both email and password.",
         variant: "destructive",
       });
       return;
@@ -33,24 +34,24 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     // Simulate login delay
     setTimeout(() => {
       // Check for admin login
-      if (studentId === 'admin' && password === 'admin') {
+      if (email === 'admin@gustie.edu' && password === 'admin') {
         toast({
           title: "Welcome Admin!",
           description: "Successfully logged in to admin dashboard",
         });
-        onLogin(studentId, true);
+        onLogin(email, true);
       }
-      // Mock authentication - accept any student ID with password "password"
+      // Mock authentication - accept any email with password "password"
       else if (password === 'password') {
         toast({
           title: "Welcome back!",
-          description: `Successfully logged in as ${studentId}`,
+          description: `Successfully logged in as ${email}`,
         });
-        onLogin(studentId, false);
+        onLogin(email, false);
       } else {
         toast({
           title: "Login Failed",
-          description: "Invalid Student ID or password.",
+          description: "Invalid email or password.",
           variant: "destructive",
         });
       }
@@ -71,15 +72,15 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="studentId" className="text-sm font-medium">Student ID</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="studentId"
-                  type="text"
-                  placeholder="Enter your Student ID"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -105,9 +106,17 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Sign up
+                </Link>
+              </p>
+            </div>
             <div className="text-xs text-gray-500 text-center mt-4 space-y-1">
-              <p>Demo: Use any Student ID with password "password"</p>
-              <p>Admin: Use "admin" / "admin"</p>
+              <p>Demo: Use any email with password "password"</p>
+              <p>Admin: Use "admin@gustie.edu" / "admin"</p>
             </div>
           </form>
         </CardContent>
