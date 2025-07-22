@@ -9,6 +9,18 @@ export const userSchema = new mongoose.Schema({
         enum : ['Student','Admin'],
         required : true
     },
+    attendedCount : {
+        type:Number,
+        default : 0
+    },
+    missedCount : {
+        type:Number,
+        default : 0
+    },
+    givenAwayCount : {
+        type:Number,
+        default : 0
+    },
     Date: {
         type : Date,
         default : Date.now()

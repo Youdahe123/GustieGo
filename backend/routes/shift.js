@@ -33,11 +33,14 @@ Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
     try{
         const {shiftId} = req.body
         const shift = await Shift.findOne({_id:shiftId,isTaken:false})
+        const person = await User.findById(req.user._id)
         if (!shift){
             return res.status(400).json({message:"Shift has been taken or not avaliable"})
         }
         shift.isTaken = true
         shift.assignedTo = req.user._id
+        person.attendedCount += 1
+        await person.save()
         await shift.save()
         res.status(200).json({message:"Shift has been claimed"})
         console.log("Shift Claimed!")
@@ -48,13 +51,44 @@ Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
 Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
     try{
         const {shiftId,reciverId} = req.body
+        const personGivingAway = await User.findById(req.user._id)
+        const personTaking = await User.findById(reciverId)
         const shift = await Shift.findById(shiftId)
+        
         shift.assignedTo = reciverId
+        personGivingAway.attendedCount -= 1
+        personTaking.attendedCount += 1
+        await personTaking.save()
+        await personGivingAway.save()
         await shift.save()
-        res.status(200).json({message:"Shift has been given away",shift})
+        res.status(200).json({message:"Shift has been given away"})
         console.log("Shift has been Given Away")
     }catch(err){
-        res.status(500).json({message:"Err with giving away a shift"})
+        res.status(500).json({message:"Err with giving away a shift",err})
+    }
+})
+Shiftrouter.get('/available',requireAuth,async (req,res)=>{
+    try {
+        const shiftsAvailable = await Shift.find({isTaken:false})
+        if(shiftsAvailable.length == 0){
+            return res.status(404).json({message:"No Shifts available!"})
+        }
+        res.status(200).json({message:"Shifts Avalible",shiftsAvailable})
+    }catch(err){res.status(500).json({message:err.message})}
+})
+Shiftrouter.put('/absence',requireAuth,async (req,res) =>{
+    try{
+        const {shiftId} = req.body
+        const shiftAbsent = await Shift.findById(shiftId)
+        const student = await User.findById(req.user._id)
+        student.missedCount += 1
+        shiftAbsent.isTaken = false
+        shiftAbsent.assignedTo = null
+        await  student.save()
+        await shiftAbsent.save()
+        res.status(200).json({message:"User has been marked absent successfully"})
+    }catch(err){
+        res.status(500).json({message:err.message})
     }
 })
 
