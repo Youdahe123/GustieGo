@@ -29,12 +29,12 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
         res.status(500).json({message:err.message})
     }
 })
-Shiftrouter.post('/claimShift',requireAuth,async (req,res) =>{
+Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
     try{
         const {shiftId} = req.body
         const shift = await Shift.findOne({_id:shiftId,isTaken:false})
         if (!shift){
-            res.status(400).json({message:"Shift has been taken or not avaliable"})
+            return res.status(400).json({message:"Shift has been taken or not avaliable"})
         }
         shift.isTaken = true
         shift.assignedTo = req.user._id
@@ -43,6 +43,18 @@ Shiftrouter.post('/claimShift',requireAuth,async (req,res) =>{
         console.log("Shift Claimed!")
     }catch(err){
         res.status(500).json({message:err.message})
+    }
+})
+Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
+    try{
+        const {shiftId,reciverId} = req.body
+        const shift = await Shift.findById(shiftId)
+        shift.assignedTo = reciverId
+        await shift.save()
+        res.status(200).json({message:"Shift has been given away",shift})
+        console.log("Shift has been Given Away")
+    }catch(err){
+        res.status(500).json({message:"Err with giving away a shift"})
     }
 })
 

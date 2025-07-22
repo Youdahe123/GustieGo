@@ -12,14 +12,15 @@ app.use('/users',router)
 app.use('/shift',Shiftrouter)
 const PORT = 3000;
 app.get('/', (req, res) => {
-    res.send('GustieGo API');
+    res.json({
+        message: "Welcome to the GustieGo API 🧑‍🍳",
+        version : '1.0.0',
+        documentation : '/info/docs',
+        about : '/info/about'
+    
+    })
+
 });
-app.get('/',async (req,res)=> {
-    try{
-        const user = await User.find();
-        res.json(user)
-    }catch(err){console.log(err)}
-})
 
 
 app.listen(
