@@ -29,3 +29,4 @@ export const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('users',userSchema)
 export default User
+// Think about using a reference array
