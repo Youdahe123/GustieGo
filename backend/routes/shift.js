@@ -18,6 +18,7 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
         const shift = await Shift.create({
             location : req.body.location,
             Time : req.body.Time,
+            hours:req.body.hours,
             dayOfWeek : req.body.dayOfWeek,
             createdBy : req.user._id,
             assignedTo : null,
@@ -32,14 +33,14 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
 Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
     try{
         const {shiftId} = req.body
-        const shift = await Shift.findOne({_id:shiftId,isTaken:false})
+        const shift = await Shift.findById(shiftId)
         const person = await User.findById(req.user._id)
         if (!shift){
             return res.status(400).json({message:"Shift has been taken or not avaliable"})
         }
         shift.isTaken = true
         shift.assignedTo = req.user._id
-        person.attendedCount += 1
+        person.shifts.push(shiftId)
         await person.save()
         await shift.save()
         res.status(200).json({message:"Shift has been claimed"})
@@ -50,14 +51,19 @@ Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
 })
 Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
     try{
-        const {shiftId,reciverId} = req.body
+        const {shiftId,reciverusername} = req.body
         const personGivingAway = await User.findById(req.user._id)
-        const personTaking = await User.findById(reciverId)
+        const personTaking = await User.findOne({username:reciverusername})
         const shift = await Shift.findById(shiftId)
-        
-        shift.assignedTo = reciverId
-        personGivingAway.attendedCount -= 1
-        personTaking.attendedCount += 1
+        if(!personTaking){
+            return res.status(404).json({message:"User not found"})
+        }
+        // remove shift from the person giving away
+        await User.findByIdAndUpdate(personGivingAway._id,{$pull:{shifts:shiftId}})
+        // adding to the person taking the shifts
+        personTaking.shifts.push(shiftId)
+        // assinging it to the reciver
+        shift.assignedTo = personTaking._id
         await personTaking.save()
         await personGivingAway.save()
         await shift.save()
@@ -81,6 +87,7 @@ Shiftrouter.put('/absence',requireAuth,async (req,res) =>{
         const {shiftId} = req.body
         const shiftAbsent = await Shift.findById(shiftId)
         const student = await User.findById(req.user._id)
+        await User.findByIdAndUpdate(req.user._id, {$pull:{shifts:shiftId}})
         student.missedCount += 1
         shiftAbsent.isTaken = false
         shiftAbsent.assignedTo = null

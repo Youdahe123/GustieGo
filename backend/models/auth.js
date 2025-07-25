@@ -4,14 +4,15 @@ export const userSchema = new mongoose.Schema({
     name : String,
     email : String,
     password : String,
+    username : {
+        type:String,
+        unique : true,
+        required :true,
+    },
     role : {
         type : String,
         enum : ['Student','Admin'],
         required : true
-    },
-    attendedCount : {
-        type:Number,
-        default : 0
     },
     missedCount : {
         type:Number,
@@ -21,6 +22,10 @@ export const userSchema = new mongoose.Schema({
         type:Number,
         default : 0
     },
+    shifts :[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'shifts'
+    }],
     Date: {
         type : Date,
         default : Date.now()

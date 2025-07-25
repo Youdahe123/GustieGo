@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 export const ShiftsSchema = new mongoose.Schema({
     location: String,
     Time : String,
+    hours : {
+        type: Number,
+        required:true
+    },
     isTaken: {
         type: Boolean,
         default: false
@@ -20,7 +24,10 @@ export const ShiftsSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'users'
     },
-    notes : String,
+    notes : {
+        type: String,
+        required:false
+    }
 }, {timestamps:true});
 
 const Shift = mongoose.model('shifts',ShiftsSchema)

@@ -2,6 +2,7 @@ import express from 'express'
 import router from './routes/user.js';
 import Shiftrouter from './routes/shift.js';
 import infoRouter from './routes/info.js';
+import analyticsRouter from './routes/analytics.js';
 import User from './models/auth.js';
 import cors from 'cors'
 import path from 'path'
@@ -12,6 +13,7 @@ app.use(express.json())
 app.use('/users',router)
 app.use('/shift',Shiftrouter)
 app.use('/info',infoRouter)
+app.use('/analytics',analyticsRouter)
 const PORT = 3000;
 app.get('/', (req, res) => {
     res.json({
