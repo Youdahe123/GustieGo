@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { LogOut, Coffee, Clock, DollarSign, AlertTriangle, CheckCircle, Trash2, AlertCircle } from 'lucide-react';
+// TODO: Replace with actual API calls
+// import { getAvailableShifts, claimShift } from '../lib/api';
 
 interface LocationShift {
   id: string;
@@ -29,9 +31,11 @@ interface DashboardProps {
 const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
   const locations = ['Kitchen', 'Salad', 'Bakery', 'Wok', 'Pizza', 'Grill', 'Deli', 'Cashier', 'Rotisserie', 'Dishroom', 'Lunch Buffet', 'Courtyard', 'STEAMery'];
   const [selectedLocation, setSelectedLocation] = useState<string>('All Locations');
-  const [accessKey, setAccessKey] = useState('');
+  const [transferTarget, setTransferTarget] = useState('');
+  const [absenceTarget, setAbsenceTarget] = useState('');
   const [shiftToRemove, setShiftToRemove] = useState<string | null>(null);
   const [isRemovalDialogOpen, setIsRemovalDialogOpen] = useState(false);
+  const [isAbsenceDialogOpen, setIsAbsenceDialogOpen] = useState(false);
   
   const [weekdayShifts, setWeekdayShifts] = useState<LocationShift[]>([
     { id: 'w1', location: 'Kitchen', day: 'Monday', timeSlot: '7:00-11:00 AM', hoursPerShift: 4, maxWorkers: 3, currentWorkers: 1, status: 'available' },
@@ -44,16 +48,102 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
     { id: 'w8', location: 'Dishroom', day: 'Monday', timeSlot: '7:00-11:00 PM', hoursPerShift: 4, maxWorkers: 3, currentWorkers: 1, status: 'assigned' }
   ]);
 
-  const [weekendShifts, setWeekendShifts] = useState<LocationShift[]>([
-    { id: 'e1', location: 'Kitchen', day: 'Friday', timeSlot: '4:00-8:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 0, status: 'available' },
-    { id: 'e2', location: 'Kitchen', day: 'Saturday', timeSlot: '8:00 AM-12:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'available' },
-    { id: 'e3', location: 'Salad', day: 'Saturday', timeSlot: '12:00-4:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'available' },
-    { id: 'e4', location: 'Bakery', day: 'Sunday', timeSlot: '6:00-10:00 AM', hoursPerShift: 4, maxWorkers: 1, currentWorkers: 0, status: 'available' },
-    { id: 'e5', location: 'Courtyard', day: 'Saturday', timeSlot: '10:00 AM-2:00 PM', hoursPerShift: 4, maxWorkers: 2, currentWorkers: 1, status: 'requested' },
-    { id: 'e6', location: 'STEAMery', day: 'Sunday', timeSlot: '2:00-6:00 PM', hoursPerShift: 4, maxWorkers: 1, currentWorkers: 1, status: 'full' }
-  ]);
+  const [weekendShifts, setWeekendShifts] = useState<LocationShift[]>([]);
 
-  const handleRequestShift = (shiftId: string, isWeekend: boolean) => {
+  useEffect(() => {
+    // TODO: Replace with actual API call
+    // API Endpoint: GET /available
+    // async function fetchWeekendShifts() {
+    //   try {
+    //     const response = await fetch('/available');
+    //     const data = await response.json();
+    //     setWeekendShifts(data);
+    //   } catch (error) {
+    //     toast({
+    //       title: 'Error',
+    //       description: 'Failed to fetch weekend shifts from backend.',
+    //       variant: 'destructive',
+    //     });
+    //   }
+    // }
+    // fetchWeekendShifts();
+    
+    // Dummy data for weekend shifts
+    const dummyWeekendShifts: LocationShift[] = [
+      {
+        id: 'w1',
+        location: 'Kitchen',
+        day: 'Saturday',
+        timeSlot: '8:00-12:00 PM',
+        hoursPerShift: 4,
+        maxWorkers: 2,
+        currentWorkers: 1,
+        status: 'available' as const
+      },
+      {
+        id: 'w2',
+        location: 'Salad',
+        day: 'Sunday',
+        timeSlot: '10:00 AM-2:00 PM',
+        hoursPerShift: 4,
+        maxWorkers: 2,
+        currentWorkers: 0,
+        status: 'available' as const
+      }
+    ];
+    setWeekendShifts(dummyWeekendShifts);
+  }, []);
+
+  const handleRequestShift = async (shiftId: string, isWeekend: boolean) => {
+    // TODO: Replace with actual API call
+    // API Endpoint: PUT /claimShift
+    // try {
+    //   const response = await fetch('/claimShift', {
+    //     method: 'PUT',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ shiftId })
+    //   });
+    //   const data = await response.json();
+    //   if (data.success) {
+    //     if (isWeekend) {
+    //       setWeekendShifts(prevShifts =>
+    //         prevShifts.map(shift =>
+    //           shift.id === shiftId
+    //             ? { ...shift, status: 'requested' as const }
+    //             : shift
+    //         )
+    //       );
+    //     } else {
+    //       setWeekdayShifts(prevShifts =>
+    //         prevShifts.map(shift =>
+    //           shift.id === shiftId
+    //             ? { ...shift, status: 'requested' as const }
+    //             : shift
+    //         )
+    //       );
+    //     }
+    //     const allShifts = [...weekdayShifts, ...weekendShifts];
+    //     const shift = allShifts.find(s => s.id === shiftId);
+    //     toast({
+    //       title: 'Shift Request Sent!',
+    //       description: `Your request for ${shift?.location} on ${shift?.day} has been submitted.`,
+    //     });
+    //   } else {
+    //     toast({
+    //       title: 'Request Failed',
+    //       description: data.message || 'Could not request shift.',
+    //       variant: 'destructive',
+    //     });
+    //   }
+    // } catch (error) {
+    //   toast({
+    //     title: 'Error',
+    //     description: 'Failed to request shift from backend.',
+    //     variant: 'destructive',
+    //   });
+    // }
+    
+    // Dummy implementation - simulate successful shift claim
     if (isWeekend) {
       setWeekendShifts(prevShifts =>
         prevShifts.map(shift =>
@@ -71,26 +161,32 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
         )
       );
     }
-
     const allShifts = [...weekdayShifts, ...weekendShifts];
     const shift = allShifts.find(s => s.id === shiftId);
     toast({
-      title: "Shift Request Sent!",
-      description: `Your request for ${shift?.location} on ${shift?.day} has been submitted.`,
+      title: 'Shift Claimed!',
+      description: `Successfully claimed shift for ${shift?.location} on ${shift?.day}.`,
     });
   };
 
-  const handleRemoveShift = (type: 'remove' | 'absence') => {
-    if (accessKey !== 'cafe2024') {
+  const handleTransferShift = () => {
+    if (!shiftToRemove || !transferTarget.trim()) {
       toast({
-        title: "Invalid Access Key",
-        description: "Please enter the correct access key provided by café management.",
+        title: "Missing Information",
+        description: "Please enter the username of the person you want to transfer this shift to.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!shiftToRemove) return;
+    // TODO: Replace with actual API call
+    // API Endpoint: PUT /giveAway
+    // const response = await fetch('/giveAway', {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ shiftId: shiftToRemove, targetStudentId: transferTarget })
+    // });
+    // const data = await response.json();
 
     const updateShifts = (shifts: LocationShift[]) =>
       shifts.map(shift =>
@@ -103,15 +199,42 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
     setWeekendShifts(updateShifts);
 
     toast({
-      title: type === 'remove' ? "Shift Removed" : "Absence Marked",
-      description: type === 'remove' 
-        ? "Your shift has been removed and made available for others."
-        : "Your absence has been logged and will be reviewed by management.",
-      variant: type === 'absence' ? "destructive" : "default",
+      title: "Shift Transferred",
+      description: `Shift transferred to ${transferTarget}.`,
     });
 
     setIsRemovalDialogOpen(false);
-    setAccessKey('');
+    setTransferTarget('');
+    setShiftToRemove(null);
+  };
+
+  const handleMarkAbsence = () => {
+    if (!shiftToRemove || !absenceTarget.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a student username to mark as absent.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // TODO: Replace with actual API call
+    // API Endpoint: PUT /absence
+    // const response = await fetch('/absence', {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ shiftId: shiftToRemove, studentId: absenceTarget })
+    // });
+    // const data = await response.json();
+
+    toast({
+      title: "Absence Marked",
+      description: `Absence logged for ${absenceTarget} on this shift.`,
+      variant: "destructive",
+    });
+
+    setIsAbsenceDialogOpen(false);
+    setAbsenceTarget('');
     setShiftToRemove(null);
   };
 
@@ -205,31 +328,75 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Remove Shift</DialogTitle>
+                    <DialogTitle>Transfer Shift</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">
-                      Enter the access key provided by café management to remove this shift:
+                      Enter the username of the person you want to transfer this shift to:
                     </p>
                     <Input
-                      type="password"
-                      placeholder="Access key"
-                      value={accessKey}
-                      onChange={(e) => setAccessKey(e.target.value)}
+                      type="text"
+                      placeholder="Enter username"
+                      value={transferTarget}
+                      onChange={(e) => setTransferTarget(e.target.value)}
                     />
                     <div className="flex space-x-2">
                       <Button
-                        onClick={() => handleRemoveShift('remove')}
+                        onClick={handleTransferShift}
                         className="flex-1"
                       >
-                        ❌ Remove Shift
+                        🔄 Transfer Shift
                       </Button>
                       <Button
-                        onClick={() => handleRemoveShift('absence')}
+                        variant="outline"
+                        onClick={() => setIsRemovalDialogOpen(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={isAbsenceDialogOpen && shiftToRemove === shift.id} onOpenChange={setIsAbsenceDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => setShiftToRemove(shift.id)}
+                  >
+                    🚫 Mark Absence
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Mark Absence</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Enter a student username to mark as absent (you can mark yourself):
+                    </p>
+                    <Input
+                      type="text"
+                      placeholder="Enter username (or your own)"
+                      value={absenceTarget}
+                      onChange={(e) => setAbsenceTarget(e.target.value)}
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={handleMarkAbsence}
                         variant="destructive"
                         className="flex-1"
                       >
                         🚫 Mark Absence
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsAbsenceDialogOpen(false)}
+                        className="flex-1"
+                      >
+                        Cancel
                       </Button>
                     </div>
                   </div>
@@ -262,10 +429,22 @@ const Dashboard = ({ studentId, onLogout }: DashboardProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
-                <Coffee className="w-4 h-4 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-800">GustieGo</h1>
+              <Button
+                variant="ghost"
+                className="p-0 h-auto hover:bg-transparent"
+                onClick={() => window.location.href = '/'}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                  <Coffee className="w-4 h-4 text-white" />
+                </div>
+              </Button>
+              <Button
+                variant="ghost"
+                className="p-0 h-auto text-xl font-bold text-gray-800 hover:text-gray-600 hover:bg-transparent"
+                onClick={() => window.location.href = '/'}
+              >
+                GustieGo
+              </Button>
             </div>
             <div className="flex items-center space-x-4">
               <Select value={selectedLocation} onValueChange={setSelectedLocation}>

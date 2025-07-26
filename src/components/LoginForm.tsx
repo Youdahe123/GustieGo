@@ -31,6 +31,15 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
     setIsLoading(true);
     
+    // TODO: Replace with actual API call
+    // API Endpoint: POST /auth/login
+    // const response = await fetch('/auth/login', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ email, password })
+    // });
+    // const data = await response.json();
+    
     // Simulate login delay
     setTimeout(() => {
       // Check for admin login

@@ -53,6 +53,15 @@ const SignupForm = ({ onSignup }: SignupFormProps) => {
 
     setIsLoading(true);
     
+    // TODO: Replace with actual API call
+    // API Endpoint: POST /auth/register
+    // const response = await fetch('/auth/register', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ name, email, password, role })
+    // });
+    // const data = await response.json();
+    
     // Simulate signup delay
     setTimeout(() => {
       toast({
