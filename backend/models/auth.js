@@ -14,18 +14,7 @@ export const userSchema = new mongoose.Schema({
         enum : ['Student','Admin'],
         required : true
     },
-    missedCount : {
-        type:Number,
-        default : 0
-    },
-    givenAwayCount : {
-        type:Number,
-        default : 0
-    },
-    shifts :[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref: 'shifts'
-    }],
+    isInternational : Boolean,
     Date: {
         type : Date,
         default : Date.now()
@@ -35,3 +24,4 @@ export const userSchema = new mongoose.Schema({
 const User = mongoose.model('users',userSchema)
 export default User
 // Think about using a reference array
+// add interntaional and removed the shifts and missed count
