@@ -167,7 +167,7 @@ const getStudentAnalytics = async (studentId: string) => {
 
 ### 📝 Missing APIs (Used in Frontend but Not Provided)
 
-The following APIs are referenced in the frontend code but not included in your provided API list. You may need to implement these or modify the frontend to use existing endpoints:
+The following APIs are referenced in the frontend code but not included in my APIs . need to implement these or modify the frontend to use existing endpoints:
 
 ```javascript
 // Used in AdminDashboard.tsx - Update shift status
