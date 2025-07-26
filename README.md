@@ -1,4 +1,4 @@
-# GustieGo - Cafeteria Shift Management System
+# GustieGo - Cafeteria Shift Management System (go to backend branch for info about REST API)
 
 A modern shift management system for Gustavus Adolphus College cafeteria, built with React, TypeScript, and MongoDB/Express.js backend.
 
