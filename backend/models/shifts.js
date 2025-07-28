@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 export const ShiftsSchema = new mongoose.Schema({
     location: String,
     Time : String, // Monday Tuesday Wednsday etc
-    hours : {
+    hoursPerShift : {
         type: Number,
         required:true
     },
@@ -24,6 +24,7 @@ export const ShiftsSchema = new mongoose.Schema({
         enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         required: true
     },
+    status : String,
     createdBy : {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'users'

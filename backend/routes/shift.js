@@ -16,16 +16,18 @@ const __dirname = dirname(__filename);
 Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
     try{
         const shift = await Shift.create({
-            location : req.body.location,
-            Time : req.body.Time,
-            hours:req.body.hours,
-            dayOfWeek : req.body.dayOfWeek,
-            createdBy : req.user._id,
-            assignedTo : null,
-            notes : req.body.notes,
+            location: req.body.location,
+            dayOfWeek: req.body.dayOfWeek,
+            timeSlot : req.body.timeSlot,
+            hoursPerShift : req.body.hoursPerShift,
+            isRecurring : req.body.isRecurring,
+            recurringPattern : req.body.recurringPattern,
+            status : 'active',
+            notes : req.body.notes
         })
         res.status(201).json({message:'Shift Has been created',shift})
         console.log("Shift Created!")
+        
     }catch(err){
         res.status(500).json({message:err.message})
     }

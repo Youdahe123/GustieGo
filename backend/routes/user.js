@@ -23,6 +23,7 @@ router.post('/register',async (req,res) =>{
         }
         const user = await User.create({
             name : req.body.name,
+            username :req.body.username,
             email : req.body.email,
             password: hashedUser,
             role : req.body.role,
@@ -35,7 +36,7 @@ router.post('/register',async (req,res) =>{
 })
 router.post('/login',async (req,res)=>{
     try{
-        const user = await User.findOne({email:req.body.email})
+        const user = await User.findOne({username:req.body.username})
         if(!user){
             res.status(400).json({message:"invalid email try again"})
         }
@@ -51,7 +52,7 @@ router.post('/login',async (req,res)=>{
         res.json({
             id : user._id,
             role : user.role,
-            email : user.email,
+            username : user.username,
             token : token,
         })
         console.log("Signed In to Gustie Go")
