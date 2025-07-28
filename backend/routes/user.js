@@ -38,7 +38,7 @@ router.post('/login',async (req,res)=>{
     try{
         const user = await User.findOne({username:req.body.username})
         if(!user){
-            res.status(400).json({message:"invalid email try again"})
+            res.status(400).json({message:"invalid username try again"})
         }
         const password = bcrypt.compare(req.body.password,user.password)
         if(!password){

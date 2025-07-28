@@ -8,10 +8,9 @@ export const ShiftsSchema = new mongoose.Schema({
         required:true
     },
     maxWorkers : Number,
-    currentWorkers : Number,
-    isTaken: {
-        type: Boolean,
-        default: false
+    currentWorkers : {
+        type:Number,
+        default:0
     },
     assignedStudents: [{
         type: mongoose.Schema.Types.ObjectId, // array of student names

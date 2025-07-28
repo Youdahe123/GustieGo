@@ -20,6 +20,9 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
             dayOfWeek: req.body.dayOfWeek,
             timeSlot : req.body.timeSlot,
             hoursPerShift : req.body.hoursPerShift,
+            maxWorkers : req.body.maxWorkers,
+            currentWorkers : 0,
+            assignedStudents : [],
             isRecurring : req.body.isRecurring,
             recurringPattern : req.body.recurringPattern,
             status : 'active',
@@ -34,40 +37,38 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
 })
 Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
     try{
-        const {shiftId} = req.body
-        const shift = await Shift.findById(shiftId)
-        const person = await User.findById(req.user._id)
-        if (!shift){
-            return res.status(400).json({message:"Shift has been taken or not avaliable"})
+        const shift = await Shift.findById(req.body.shiftId)
+        if(!shift){
+            res.status(404).json({message:'Shift Not found'})
         }
-        shift.isTaken = true
-        shift.assignedTo = req.user._id
-        person.shifts.push(shiftId)
-        await person.save()
+        shift.assignedStudents.push(req.user._id)
+        shift.currentWorkers += 1
         await shift.save()
-        res.status(200).json({message:"Shift has been claimed"})
-        console.log("Shift Claimed!")
+        res.status(201).json(
+            {message:"Shift has been claimed",
+            shift : {
+                id : req.body.shiftId,
+                currentWorkers: shift.currentWorkers,
+                assignedStudents : shift.assignedStudents
+            }
+            
+            })
     }catch(err){
-        res.status(500).json({message:err.message})
+        res.status(500).json({message:"Unable to claim shift", error: err.message})
     }
 })
 Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
     try{
-        const {shiftId,reciverusername} = req.body
-        const personGivingAway = await User.findById(req.user._id)
-        const personTaking = await User.findOne({username:reciverusername})
+        const {shiftId,targetStudentUsername} = req.body
         const shift = await Shift.findById(shiftId)
-        if(!personTaking){
-            return res.status(404).json({message:"User not found"})
+        shift.assignedStudents = shift.assignedStudents.filter( // removes old user from assigned db
+            id => id.toString() !== req.user._id.toString()
+        )
+        const targetId = await User.findOne({username : targetStudentUsername})
+        if(!targetId){
+            res.status(404).json({message:"User doesnt Exist!"})
         }
-        // remove shift from the person giving away
-        await User.findByIdAndUpdate(personGivingAway._id,{$pull:{shifts:shiftId}})
-        // adding to the person taking the shifts
-        personTaking.shifts.push(shiftId)
-        // assinging it to the reciver
-        shift.assignedTo = personTaking._id
-        await personTaking.save()
-        await personGivingAway.save()
+        await shift.assignedStudents.push(targetId._id)
         await shift.save()
         res.status(200).json({message:"Shift has been given away"})
         console.log("Shift has been Given Away")
@@ -77,24 +78,28 @@ Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
 })
 Shiftrouter.get('/available',requireAuth,async (req,res)=>{
     try {
-        const shiftsAvailable = await Shift.find({isTaken:false})
-        if(shiftsAvailable.length == 0){
-            return res.status(404).json({message:"No Shifts available!"})
-        }
-        res.status(200).json({message:"Shifts Avalible",shiftsAvailable})
+        const {location} = req.query
+        const filter = {status:'active'}
+        if (location) filter.location = location
+        const locationShift = await Shift.find(filter)   
+        if(locationShift.length === 0){
+            return res.status(404).json({message:"No Shifts Found"})
+        }     
+        res.status(200).json({
+            message : "Success",
+            shifts: locationShift
+        })
     }catch(err){res.status(500).json({message:err.message})}
 })
 Shiftrouter.put('/absence',requireAuth,async (req,res) =>{
     try{
         const {shiftId} = req.body
-        const shiftAbsent = await Shift.findById(shiftId)
-        const student = await User.findById(req.user._id)
-        await User.findByIdAndUpdate(req.user._id, {$pull:{shifts:shiftId}})
-        student.missedCount += 1
-        shiftAbsent.isTaken = false
-        shiftAbsent.assignedTo = null
-        await  student.save()
-        await shiftAbsent.save()
+        const userId = req.user_.id
+        const shiftAbsence = await Shift.findById(shiftId)
+        shiftAbsence.assignedStudents = shiftAbsence.assignedStudents.filter(
+            id => id.toString() !== userId.toString()
+        )
+        
         res.status(200).json({message:"User has been marked absent successfully"})
     }catch(err){
         res.status(500).json({message:err.message})
