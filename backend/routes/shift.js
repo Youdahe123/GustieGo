@@ -99,6 +99,7 @@ Shiftrouter.put('/absence',requireAuth,async (req,res) =>{
         shiftAbsence.assignedStudents = shiftAbsence.assignedStudents.filter(
             id => id.toString() !== userId.toString()
         )
+        shiftAbsence.currentWorkers -= 1
         
         res.status(200).json({message:"User has been marked absent successfully"})
     }catch(err){
