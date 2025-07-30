@@ -1,70 +1,20 @@
-
 import express from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import path from 'path';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import User from '../models/auth.js';
+import {requireAdmin, requireAuth} from '../middleware/adminAuth.js';
 
-const router = express.Router();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-dotenv.config({path:path.join(__dirname,'jwt.env')});
-console.log(process.env.JWT_KEY)
+const calendarRouter = express.Router();
 
-router.post('/register',async (req,res) =>{
-    try{
-        const hashedUser = await bcrypt.hash(req.body.password,10)
-        const dbCheck = await User.findOne({email:req.body.email})
-        if (dbCheck){
-            return res.status(400).json({message:"email already exists"})
-        }
-        const user = await User.create({
-            name : req.body.name,
-            username :req.body.username,
-            email : req.body.email,
-            password: hashedUser,
-            role : req.body.role,
-        })
-        console.log("Registerd Succesfully")
-        res.status(201).json({message: `Welcome ${user.name} to GustieGo!`,user})
-    }catch(err){
-        res.status(500).json({message: `Problem With adding account:${err.message}` })
-    }
-})
-router.post('/login',async (req,res)=>{
-    try{
-        const user = await User.findOne({username:req.body.username})
-        if(!user){
-            res.status(400).json({message:"invalid username try again"})
-        }
-        const password = bcrypt.compare(req.body.password,user.password)
-        if(!password){
-            res.status(400).json({message: "Invalid Password Try again"})
-        }
-        const token = jwt.sign(
-            {id : user._id},
-            process.env.JWT_KEY,
-            {'expiresIn':'30d'}
-        )
-        res.json({
-            id : user._id,
-            role : user.role,
-            username : user.username,
-            token : token,
-        })
-        console.log("Signed In to Gustie Go")
-    }catch(err){
-        console.log(err)
-        res.status(500).json({"message":err.message})
-    }
-})
-export default router
+// TODO: Implement calendar routes
+// GET /calendar - Get all shifts for calendar view
+// GET /calendar/department/:deptId - Get department-specific calendar
+// GET /calendar/student/:studentId - Get student's personal calendar
+// POST /calendar/event - Create new calendar event
+// PUT /calendar/event/:id - Update calendar event
+// DELETE /calendar/event/:id - Delete calendar event
+
+export default calendarRouter;
 
 // ==========================================
-// 🚀 GustieGo API TODO List - USER ROUTES
+// 🚀 GustieGo API TODO List - CALENDAR ROUTES
 // ==========================================
 
 // 📋 AUTHENTICATION ROUTES TO IMPLEMENT

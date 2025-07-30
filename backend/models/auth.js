@@ -15,11 +15,12 @@ export const userSchema = new mongoose.Schema({
         required : true
     },
     isInternational : Boolean,
-    Date: {
-        type : Date,
-        default : Date.now()
-    }
-})
+    isActive : {
+        type : Boolean,
+        required : true
+    },
+    lastLogin: Date,
+}, { timestamps: true })
 
 const User = mongoose.model('users',userSchema)
 export default User
