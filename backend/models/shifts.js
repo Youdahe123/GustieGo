@@ -44,10 +44,6 @@ export const ShiftsSchema = new mongoose.Schema({
             required: false
         }
     }],
-    transferredTo:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'users'
-    },
     isRecurring:Boolean,
     recurringPattern : String, // weekly biweekly etc
     dayOfWeek: {
@@ -61,7 +57,7 @@ export const ShiftsSchema = new mongoose.Schema({
     },
     status :{
         type:String,
-        enum :['claimed', 'completed', 'cancelled', 'absent', 'transferred'],
+        enum :['active','inactive','completed']
     },   
     createdBy : {
         type: mongoose.Schema.Types.ObjectId,
@@ -69,7 +65,7 @@ export const ShiftsSchema = new mongoose.Schema({
     },
     weekOf :{
         type : Date,
-        required : true,
+        required : false,
     },
     notes : {
         type: String,
@@ -79,20 +75,16 @@ export const ShiftsSchema = new mongoose.Schema({
 ShiftsSchema.pre('save',function(next){
     if(!this.weekOf){
         const today = new Date()
-        const day = today.getDay()
-        const diff = today.getDate - day + (day === 0 ? -6 : 1)
-        this.weekOf = newDate(today.setDate(diff))
+        const day = today.getDay() // 0 (Sun) - 6 (Sat)
+        // Calculate how many days to subtract to get to Monday
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1)
+        const monday = new Date(today.setDate(diff))
+        // Set time to midnight for consistency
+        monday.setHours(0, 0, 0, 0)
+        this.weekOf = monday
     }
     next()
-}),
-ShiftsSchema.pre('save',function(next){
-    const today = new Date()
-    const day = today.getDay()
-    if(day % 7 != 6){
-
-    } 
-}),
-
+})
 const Shift = mongoose.model('shifts',ShiftsSchema)
 export default Shift
 

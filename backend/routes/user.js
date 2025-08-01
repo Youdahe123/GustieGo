@@ -27,6 +27,9 @@ router.post('/register',async (req,res) =>{
             email : req.body.email,
             password: hashedUser,
             role : req.body.role,
+            isInternational:req.body.isInternational,
+            isActive :req.body.isActive,
+            lastLogin : Date.now()
         })
         console.log("Registerd Succesfully")
         res.status(201).json({message: `Welcome ${user.name} to GustieGo!`,user})

@@ -14,10 +14,13 @@ export const userSchema = new mongoose.Schema({
         enum : ['Student','Admin'],
         required : true
     },
-    isInternational : Boolean,
+    isInternational : {
+        type: Boolean,
+        required : false
+    },
     isActive : {
         type : Boolean,
-        required : true
+        required : false
     },
     lastLogin: Date,
 }, { timestamps: true })
