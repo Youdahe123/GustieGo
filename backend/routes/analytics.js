@@ -4,6 +4,7 @@ import User from '../models/auth.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {requireAdmin,requireAuth} from '../middleware/adminAuth.js';
+import weekStates from '../models/weeklyAnalytics.js';
 
 
 const analyticsRouter = express.Router();
