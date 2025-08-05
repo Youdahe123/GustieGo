@@ -14,10 +14,13 @@ const __dirname = dirname(__filename);
 
 Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
     try{
+        const [startTime,endTime]  = req.body.Time.split(' - ')
         const shift = await Shift.create({
             location: req.body.location,
             dayOfWeek: req.body.dayOfWeek,
             Time : req.body.Time,
+            startTime:startTime,
+            endTime:endTime,
             hoursPerShift : req.body.hoursPerShift,
             maxWorkers : req.body.maxWorkers,
             currentWorkers : 0,
