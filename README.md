@@ -1,233 +1,234 @@
-# 🚍 GustieGo API
+# 🚍 GustieGo - Fullstack Shift Management System
 
-The **GustieGo API** is the backend engine behind the GustieGo platform — a student-focused shift scheduling and ride-sharing system built for the Gustavus Adolphus College community.
+A complete shift management system for Gustavus Adolphus College cafeteria, built with **React + TypeScript** frontend and **Node.js + Express + MongoDB** backend.
 
-Built with modular microservices and a clean API-first design, it handles user authentication, shift coordination, time tracking, and smart notifications.
+## 🚀 Features
 
----
-
-## 📦 Overview
-
-| Service                 | Description                                                |
-| ----------------------- | ---------------------------------------------------------- |
-| 👤 User Service         | Manages accounts, logins, and permissions                  |
-| 📅 Shift Service        | Core logic for Caf shift creation, claiming, and giveaways |
-| 💰 Time & Pay Service   | Tracks hours worked and calculates estimated payroll       |
-| 🔔 Notification Service | Sends email/SMS alerts for shift events and warnings       |
-| 🛡️ Security Layer       | Auth middleware and permission control                     |
-| 📊 Analytics Service    | (Optional) Tracks trends like shift coverage and no-shows  |
-
----
-
-## 🧍‍♂️ 1. User Service
-
-Handles student/admin profiles, login, and permissions.
-
-### Endpoints
-
-- `POST /signup`
-- `POST /login`
-- `GET /users/{id}`
-- `PATCH /users/{id}`
-
-### Responsibilities
-
-- JWT authentication & refresh logic
-- Role management: student vs admin
-- Password hashing with bcrypt
-- Middleware for secure route access
-
----
-
-## 📅 2. Shift Service
-
-The core of the platform — manages Caf shifts.
-
-### Endpoints
-
-- `POST /shifts` (admin only)
-- `GET /shifts/available`
-- `POST /shifts/claim`
-- `POST /shifts/giveaway`
-- `PATCH /shifts/{id}/status`
-
-### Responsibilities
-
-- Recurring shift schedule generation
-- Track shift claims/giveaways
-- Verify users via internal User Service
-- Record attendance: `attended`, `missed`, `given_away`
-
----
-
-## 💰 3. Time & Pay Service
-
-Tracks student hours and calculates estimated pay.
-
-### Endpoints
-
-- `GET /payroll/{user_id}`
-- `GET /hours/{user_id}`
-
-### Responsibilities
-
-- Aggregates data from Shift Service
-- Calculates total weekly hours/pay
-- Flags students nearing 20-hour work limit
-- Admin dashboard for full payroll logs
-
----
-
-## 🔔 4. Notification Service
-
-Handles system alerts and reminders.
-
-### Triggers
-
-- Shift claimed/dropped
-- Weekly hour warning
-- Upcoming shift reminders
-
-### Channels
-
-- Email (SendGrid / SES)
-- Optional: SMS or push (Twilio / Firebase)
-
-### Responsibilities
-
-- Listens to events across services
-- Sends batch or real-time notifications
-
----
-
-## 🛡️ 5. Security Layer
-
-(Can be part of User Service)
-
-### Responsibilities
-
-- Middleware for protected routes
-- Token validation & refresh
-- Role-based access (e.g., admin-only for shift creation)
-- Prevent cross-user data exposure
-
----
-
-## 📊 6. Analytics Service (Optional, Post-MVP)
-
-Provides insights into platform usage.
-
-### Responsibilities
-
-- Shift coverage and attendance trends
-- Busiest times, most missed shifts
-- Future integration with admin dashboards
-
----
-
-## 🗄️ Database Design
-
-(MongoDB for MVP, PostgreSQL optional)
-
-```bash
-users (
-  id, name, email, role, password_hash
-)
-
-shifts (
-  id, datetime, status, student_id, created_by, is_recurring
-)
-
-assignments (
-  shift_id, student_id, claimed_at
-)
-
-payroll_logs (
-  user_id, week_start, total_hours, estimated_pay
-)
-```
-
----
-
-## 🚀 Tech Stack
-
-| Layer             | Tech                           |
-| ----------------- | ------------------------------ |
-| **Backend**       | Node.js + Express              |
-| **Frontend**      | React + TypeScript             |
-| **Database**      | MongoDB                        |
-| **Auth**          | JWT + bcrypt                   |
-| **Notifications** | SendGrid, SES, Twilio/Firebase |
-| **Hosting**       | Railway / Render / Fly.io      |
-
----
-
-## 🎯 Frontend Features
-
-### Student Features
+### 👨‍🎓 Student Features
 
 - **Browse Available Shifts**: View all available shifts by location and time
 - **Claim Shifts**: Instantly claim available shifts with one click
 - **Give Away Shifts**: Transfer claimed shifts to other students
+- **Mark Absence**: Report when you can't attend a shift
 - **View Current & Past Shifts**: Track your shift history and current assignments
-- **See Attendance Status**: Monitor your attendance and performance
-- **Weekend Shift Tracking**: Ensure compliance with weekend shift requirements
+- **Calendar View**: Visual weekly schedule of all shifts
 
-### Admin Features
+### 👨‍💼 Admin Features
 
-- **Create New Shifts**: Add one-time or recurring shifts with custom parameters
-- **Manage Shift Status**: Activate, deactivate, or cancel shifts
+- **Create New Shifts**: Add shifts with custom time slots and locations
+- **Manage Shift Status**: Activate, deactivate, or delete shifts
 - **Central Shift Management**: Comprehensive dashboard for all shift operations
-- **Calendar View**: Visual weekly schedule with print functionality
-- **Student Assignment Tracking**: Monitor student assignments and hours
+- **Analytics Dashboard**: Student performance and attendance tracking
+- **Calendar Management**: Visual shift scheduling and overview
+
+### 🔐 Authentication
+
+- **Secure Login/Register**: JWT-based authentication
+- **Role-based Access**: Student vs Admin permissions
+- **Session Management**: Persistent login with localStorage
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- **React 18** with TypeScript
+- **Material-UI (MUI)** for modern UI components
+- **React Router** for navigation
+- **Axios** for API communication
+- **Recharts** for data visualization
+- **Date-fns** for date manipulation
+
+### Backend
+
+- **Node.js** with Express.js
+- **MongoDB** with Mongoose ODM
+- **JWT** for authentication
+- **bcrypt** for password hashing
+- **CORS** enabled for frontend communication
+
+## 📁 Project Structure
+
+```
+GustieGoAPI/
+├── backend/
+│   ├── app.js                 # Main server file
+│   ├── db/
+│   │   └── db.js             # MongoDB connection
+│   ├── middleware/
+│   │   └── adminAuth.js      # Authentication middleware
+│   ├── models/
+│   │   ├── auth.js           # User model
+│   │   └── shifts.js         # Shift model
+│   ├── routes/
+│   │   ├── analytics.js      # Analytics endpoints
+│   │   ├── calender.js       # Calendar endpoints
+│   │   ├── info.js           # Info endpoints
+│   │   ├── shift.js          # Shift management
+│   │   └── user.js           # User authentication
+│   └── services/
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── contexts/         # React contexts
+│   │   ├── pages/            # Page components
+│   │   ├── services/         # API services
+│   │   └── types/            # TypeScript types
+│   └── public/
+└── README.md
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- MongoDB installed and running
+- npm or yarn
+
+### Backend Setup
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+Backend will run on `http://localhost:3000`
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Frontend will run on `http://localhost:3001`
+
+## 📊 API Endpoints
+
+### Authentication
+
+- `POST /users/register` - User registration
+- `POST /users/login` - User login
+
+### Shift Management
+
+- `POST /shift/makeShift` - Create new shift (admin)
+- `GET /shift/available` - Get available shifts
+- `PUT /shift/claimShift` - Claim a shift
+- `PUT /shift/giveAway` - Give away a shift
+- `PUT /shift/absence` - Mark absence
+- `DELETE /shift/delete` - Delete shift (admin)
+
+### Analytics
+
+- `GET /analytics/student/:id` - Get student analytics
+
+## 🎯 Key Features Implemented
+
+### ✅ Student Dashboard
+
+- Browse available shifts by location
+- Claim shifts instantly
+- Give away shifts to other students
+- Mark absence for claimed shifts
+- View personal shift calendar
+
+### ✅ Admin Dashboard
+
+- Create new shifts with time selection
+- Manage shift status and deletion
+- View all shifts with filtering
+- Analytics dashboard with charts
+- Calendar view for shift management
+
+### ✅ Authentication System
+
+- Secure login/register with role selection
+- JWT token-based authentication
+- Protected routes for admin functions
+- Session persistence
+
+## 🔒 Security Features
+
+- **Password hashing** with bcrypt
+- **JWT token** authentication
+- **Role-based access** control (Student/Admin)
+- **Input validation** and sanitization
+- **CORS** configuration for frontend-backend communication
+
+## 📱 User Interface
+
+### Modern Design
+
+- **Material-UI** components for consistent design
+- **Responsive layout** that works on desktop and mobile
+- **Intuitive navigation** with sidebar menu
+- **Real-time updates** for shift status changes
+
+### Data Visualization
+
+- **Interactive charts** for analytics
+- **Calendar view** for shift scheduling
+- **Progress indicators** for loading states
+- **Error handling** with user-friendly messages
+
+## 🚀 Deployment
+
+### Backend Deployment
+
+1. Set up MongoDB database
+2. Configure environment variables
+3. Deploy to Railway/Render/Fly.io
+4. Set up CORS for frontend domain
+
+### Frontend Deployment
+
+1. Build the project: `npm run build`
+2. Deploy to Vercel/Netlify/GitHub Pages
+3. Configure API base URL for production
+
+## 🔧 Development
+
+### Available Scripts
+
+**Backend:**
+
+- `npm start` - Start development server
+- `npm run dev` - Start with nodemon (if configured)
+
+**Frontend:**
+
+- `npm start` - Start development server
+- `npm build` - Build for production
+- `npm test` - Run tests
+
+## 🧪 Future Enhancements
+
+- **Real-time notifications** with WebSocket
+- **Email/SMS alerts** for shift reminders
+- **Google Calendar integration**
+- **Mobile app** with React Native
+- **Advanced analytics** with machine learning
+- **Multi-campus support**
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📞 Support
+
+For support, email: youdaheasfaw@gmail.com
+
+## 📄 License
+
+This project is licensed under the MIT License.
 
 ---
 
-## 🧪 Future Improvements
-
-- Admin analytics dashboard
-- SMS/push notifications
-- GraphQL API gateway
-- PostgreSQL migration with Prisma
-- Google Calendar integration
-
----
-
-## 🧠 Contributing
-
-Interested in helping build GustieGo?  
-Open an issue, fork the repo, and get in touch!
-
-// ===============================
-// TODOs & NOTES FOR SHIFT ROUTES
-// ===============================
-
-// --- /makeShift Endpoint ---
-// - Consider validating that Time is in the correct format ("HH:MM AM/PM - HH:MM AM/PM").
-// - In the future, parse startTime and endTime as Date objects for easier automation (currently stored as strings).
-// - Add input validation for required fields (location, dayOfWeek, hoursPerShift, etc).
-// - Optionally, allow admin to specify weekOf, or always auto-calculate (currently auto-calculated).
-// - If supporting recurring shifts, implement logic to auto-generate future shifts based on recurringPattern.
-
-// --- /claimShift Endpoint ---
-// - Prevent duplicate claims by the same user for the same shift.
-// - Consider checking if the shift is still active before allowing claim.
-
-// --- /giveAway Endpoint ---
-// - Add edge case handling for one-time shifts (non-recurring).
-// - Ensure the target student is eligible to take the shift (not already assigned).
-// - Optionally, notify both students when a shift is given away.
-
-// --- /absence Endpoint ---
-// - Consider logging absences for analytics.
-// - Optionally, allow admin override for marking absent.
-
-// --- General Improvements ---
-// - Add more robust error handling and logging.
-// - Implement input validation middleware for all endpoints.
-// - Add unit tests for all shift routes.
-// - Consider using startTime/endTime as Date objects for automation (e.g., automatic completion).
-// - Implement scheduled job (cron) for weekly analytics aggregation and shift resets.
-// - Document all endpoints and expected request/response formats.
-
-// --- Analytics ---
+**Built with ❤️ for the Gustavus Adolphus College community**
