@@ -7,6 +7,8 @@ import User from './models/auth.js';
 import cors from 'cors'
 import path from 'path'
 import './db/db.js'
+import './middleware/hourRecur.js'
+import './middleware/weekUpdate.js'
 const app = express();
 app.use(cors())
 app.use(express.json())

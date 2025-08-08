@@ -14,11 +14,10 @@ const __dirname = dirname(__filename);
 
 Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
     try{
-        const [startTime,endTime]  = req.body.Time.split(' - ')
+        const {startTime,endTime}  = req.body
         const shift = await Shift.create({
             location: req.body.location,
             dayOfWeek: req.body.dayOfWeek,
-            Time : req.body.Time,
             startTime:startTime,
             endTime:endTime,
             hoursPerShift : req.body.hoursPerShift,
@@ -164,6 +163,17 @@ Shiftrouter.put('/absence', requireAuth, async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
+})
+
+Shiftrouter.delete('/delete',requireAdmin,async (req,res) =>{
+    const shiftId = req.body
+    const shiftToRemove = await Shift.findById(shiftId)
+    if (!shiftToRemove){
+        return res.status(404).json({message:"Shift cannot be found"})
+    }
+    await Shift.deleteOne({_id : shiftId})
+    return res.status(200).json({message:"Shift Deleted"})
+
 })
 // note for later change it to keep track of shiftid when claiming a shift so a user cannot just take a shift then when marked absent it wont decrement the shift
 // for example if im working at Caf and i need to miss a shift i should delete it and it will trigger the give away shift the shiftId is the id of the shift we clicked on

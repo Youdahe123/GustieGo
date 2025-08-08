@@ -175,3 +175,37 @@ payroll_logs (
 
 Interested in helping build GustieGo?  
 Open an issue, fork the repo, and get in touch!
+
+// ===============================
+// TODOs & NOTES FOR SHIFT ROUTES
+// ===============================
+
+// --- /makeShift Endpoint ---
+// - Consider validating that Time is in the correct format ("HH:MM AM/PM - HH:MM AM/PM").
+// - In the future, parse startTime and endTime as Date objects for easier automation (currently stored as strings).
+// - Add input validation for required fields (location, dayOfWeek, hoursPerShift, etc).
+// - Optionally, allow admin to specify weekOf, or always auto-calculate (currently auto-calculated).
+// - If supporting recurring shifts, implement logic to auto-generate future shifts based on recurringPattern.
+
+// --- /claimShift Endpoint ---
+// - Prevent duplicate claims by the same user for the same shift.
+// - Consider checking if the shift is still active before allowing claim.
+
+// --- /giveAway Endpoint ---
+// - Add edge case handling for one-time shifts (non-recurring).
+// - Ensure the target student is eligible to take the shift (not already assigned).
+// - Optionally, notify both students when a shift is given away.
+
+// --- /absence Endpoint ---
+// - Consider logging absences for analytics.
+// - Optionally, allow admin override for marking absent.
+
+// --- General Improvements ---
+// - Add more robust error handling and logging.
+// - Implement input validation middleware for all endpoints.
+// - Add unit tests for all shift routes.
+// - Consider using startTime/endTime as Date objects for automation (e.g., automatic completion).
+// - Implement scheduled job (cron) for weekly analytics aggregation and shift resets.
+// - Document all endpoints and expected request/response formats.
+
+// --- Analytics ---

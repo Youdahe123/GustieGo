@@ -2,13 +2,12 @@ import mongoose from "mongoose";
 
 export const ShiftsSchema = new mongoose.Schema({
     location: String,
-    Time : String, 
     hoursPerShift : {
         type: Number,
         required:true
     },
-    startTime : String,
-    endTime : String,
+    startTime : Date,
+    endTime : Date,
     maxWorkers : Number,
     currentWorkers : {
         type:Number,
