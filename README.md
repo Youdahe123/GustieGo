@@ -154,11 +154,32 @@ payroll_logs (
 | Layer             | Tech                           |
 | ----------------- | ------------------------------ |
 | **Backend**       | Node.js + Express              |
-| **Frontend**      | React (or HTML/CSS/JS for MVP) |
+| **Frontend**      | React + TypeScript             |
 | **Database**      | MongoDB                        |
 | **Auth**          | JWT + bcrypt                   |
 | **Notifications** | SendGrid, SES, Twilio/Firebase |
 | **Hosting**       | Railway / Render / Fly.io      |
+
+---
+
+## 🎯 Frontend Features
+
+### Student Features
+
+- **Browse Available Shifts**: View all available shifts by location and time
+- **Claim Shifts**: Instantly claim available shifts with one click
+- **Give Away Shifts**: Transfer claimed shifts to other students
+- **View Current & Past Shifts**: Track your shift history and current assignments
+- **See Attendance Status**: Monitor your attendance and performance
+- **Weekend Shift Tracking**: Ensure compliance with weekend shift requirements
+
+### Admin Features
+
+- **Create New Shifts**: Add one-time or recurring shifts with custom parameters
+- **Manage Shift Status**: Activate, deactivate, or cancel shifts
+- **Central Shift Management**: Comprehensive dashboard for all shift operations
+- **Calendar View**: Visual weekly schedule with print functionality
+- **Student Assignment Tracking**: Monitor student assignments and hours
 
 ---
 
@@ -168,6 +189,7 @@ payroll_logs (
 - SMS/push notifications
 - GraphQL API gateway
 - PostgreSQL migration with Prisma
+- Google Calendar integration
 
 ---
 
