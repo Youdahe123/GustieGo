@@ -70,13 +70,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Invalid response format');
       }
       
-      const responseData = response.data as { token: string; id: string; username: string; role: string };
+      const responseData = response.data as { token: string; id?: string; _id?: string; username: string; role: string };
       const { token, ...userData } = responseData;
       
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      setUser(userData as User);
+      // Map _id to id for consistency
+      const user = {
+        ...userData,
+        id: responseData.id || (responseData as any)._id || userData.id
+      } as User;
+      
+      setUser(user);
     } catch (error) {
       throw error;
     }

@@ -39,17 +39,21 @@ Shiftrouter.post('/makeShift',requireAdmin,async (req,res) =>{
 })
 Shiftrouter.put('/claimShift',requireAuth,async (req,res) =>{
     try{
+        const isIn = await Shift.findOne({_id:req.body.shiftId,assignedStudents:req.user._id})
+        if(isIn){
+            return res.status(400).json({message:'You have already claimed this shift'})
+        }
         const shift = await Shift.findById(req.body.shiftId)
         if(!shift){
-            res.status(404).json({message:'Shift Not found'})
+            return res.status(404).json({message:'Shift Not found'})
         }
-        if(shift.currentWorkers === shift.maxWorkers){
-            return res.status(500).json({message:'current Shift is full'})
+        if(shift.currentWorkers > shift.maxWorkers){
+            return res.status(400).json({message:'Shift is full'})
         }
         shift.assignedStudents.push(req.user._id)
         shift.currentWorkers += 1
 
-         shift.studentDetails.push({
+        shift.studentDetails.push({
             studentId : req.user._id,
             claimedAt : Date.now(),
             status : 'claimed'
@@ -93,7 +97,6 @@ Shiftrouter.put('/giveAway',requireAuth,async(req,res) =>{
             studentDetail.status = 'transferred'
             studentDetail.transferredTo = targetId._id
             studentDetail.transferredAt = Date.now()
-            await shift.save()
         }else{
            return res.status(404).json({message:"Cannot Find Users"})
         }
@@ -146,7 +149,10 @@ Shiftrouter.put('/absence', requireAuth, async (req, res) => {
         shiftAbsence.assignedStudents = shiftAbsence.assignedStudents.filter(
             id => id.toString() !== userId.toString()
         );
-        shiftAbsence.currentWorkers -= 1;
+        if (shiftAbsence.currentWorkers === 0) {
+            shiftAbsence.status = 'inactive';
+        }
+        shiftAbsence.currentWorkers -= 1 ? shiftAbsence.currentWorkers > 1 : 0;
         const studentAbsenceDetail = shiftAbsence.studentDetails.find(
             details => details.studentId.toString() === userId.toString()
         );
@@ -166,7 +172,7 @@ Shiftrouter.put('/absence', requireAuth, async (req, res) => {
 })
 
 Shiftrouter.delete('/delete',requireAdmin,async (req,res) =>{
-    const shiftId = req.body
+    const {shiftId} = req.body
     const shiftToRemove = await Shift.findById(shiftId)
     if (!shiftToRemove){
         return res.status(404).json({message:"Shift cannot be found"})
