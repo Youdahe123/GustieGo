@@ -41,11 +41,11 @@ router.post('/login',async (req,res)=>{
     try{
         const user = await User.findOne({username:req.body.username})
         if(!user){
-            res.status(400).json({message:"invalid username try again"})
+            return res.status(404).json({message:"invalid username try again"})
         }
-        const password = bcrypt.compare(req.body.password,user.password)
+        const password = await bcrypt.compare(req.body.password,user.password)
         if(!password){
-            res.status(400).json({message: "Invalid Password Try again"})
+            return res.status(404).json({message: "Invalid Password Try again"})
         }
         const token = jwt.sign(
             {id : user._id},

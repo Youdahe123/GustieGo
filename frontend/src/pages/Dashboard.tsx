@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
   Button,
-  Chip,
   Alert,
   CircularProgress,
   Dialog,
@@ -15,7 +13,7 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import { Add, Person, Schedule, LocationOn } from '@mui/icons-material';
+import { Add, Schedule, LocationOn, AdminPanelSettings } from '@mui/icons-material';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -42,11 +40,7 @@ const Dashboard: React.FC = () => {
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [targetUsername, setTargetUsername] = useState('');
 
-  useEffect(() => {
-    fetchShifts();
-  }, []);
-
-  const fetchShifts = async () => {
+  const fetchShifts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/shift/available');
@@ -63,7 +57,16 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    // Only fetch shifts if user is a student
+    if (user?.role === 'Student') {
+      fetchShifts();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.role, fetchShifts]);
 
   const handleClaimShift = async (shiftId: string) => {
     try {
@@ -100,6 +103,73 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Admin Dashboard View
+  if (user?.role === 'Admin') {
+    return (
+      <Box>
+        <Typography variant="h4" gutterBottom>
+          Welcome, {user?.name}!
+        </Typography>
+        <Typography variant="h6" color="textSecondary" gutterBottom>
+          Admin Dashboard
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mt: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 300 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Quick Actions
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<Schedule />}
+                    onClick={() => window.location.href = '/shifts'}
+                    fullWidth
+                  >
+                    Manage Shifts
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<AdminPanelSettings />}
+                    onClick={() => window.location.href = '/admin'}
+                    fullWidth
+                  >
+                    Admin Panel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<LocationOn />}
+                    onClick={() => window.location.href = '/analytics'}
+                    fullWidth
+                  >
+                    View Analytics
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+          
+          <Box sx={{ flex: 1, minWidth: 300 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  System Overview
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Use the navigation menu to access administrative functions including shift management, 
+                  user administration, and system analytics.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Student Dashboard View
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
